@@ -1,0 +1,30 @@
+{
+  "name": "uicore",
+  "version": "1.0.0",
+  "description": "UICore is a library to build native-like user interfaces using pure Typescript. No HTML is needed at all. Components are described as TS classes and all user interactions are handled explicitly. This library is strongly inspired by the UIKit framework that is used in IOS. In addition, UICore has tools to handle URL based routing, array sorting and filtering and adds a number of other utilities for convenience.",
+  "main": "uicore.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inimeseke/uicore.git"
+  },
+  "keywords": [
+    "UICore",
+    "UIKit",
+    "Apple",
+    "IOS",
+    "UI",
+    "Framework",
+    "Native-like",
+    "Native",
+    "Typescript"
+  ],
+  "author": "Mart Ernits",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/inimeseke/uicore/issues"
+  },
+  "homepage": "https://github.com/inimeseke/uicore"
+}
