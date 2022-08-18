@@ -9,6 +9,8 @@ import { UIView, UIViewBroadcastEvent } from "./UIView"
 
 export class UIViewController extends UIObject {
     
+    
+    
     parentViewController: UIViewController = nil
     childViewControllers: UIViewController[] = []
     static readonly routeComponentName: string
@@ -126,6 +128,9 @@ export class UIViewController extends UIObject {
     
     
     
+    get core() {
+        return this.view.core
+    }
     
     hasChildViewController(viewController: UIViewController) {
         

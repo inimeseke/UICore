@@ -1,11 +1,11 @@
 import { IS_FIREFOX, IS_SAFARI } from "./ClientCheckers"
 import { UIColor } from "./UIColor"
 import { UICore } from "./UICore"
+import "./UICoreExtensions"
 import { UILocalizedTextObject } from "./UIInterfaces"
 import { FIRST, IS, IS_DEFINED, IS_NIL, IS_NOT, nil, NO, UIObject, YES } from "./UIObject"
 import { UIPoint } from "./UIPoint"
 import { UIRectangle } from "./UIRectangle"
-import "./UICoreExtensions"
 import { UIViewController } from "./UIViewController"
 
 
@@ -136,6 +136,7 @@ export class UIView extends UIObject {
     ignoresTouches: boolean = NO
     ignoresMouse: boolean = NO
     
+    core: UICore = UICore.main
     
     static _UIViewIndex: number = -1
     _UIViewIndex: number
@@ -1772,9 +1773,9 @@ export class UIView extends UIObject {
     addSubview(view: UIView, aboveView?: UIView) {
         
         if (!this.hasSubview(view) && IS(view)) {
-            
+    
             view.willMoveToSuperview(this)
-            
+    
             if (IS(aboveView)) {
                 this.viewHTMLElement.insertBefore(view.viewHTMLElement, aboveView.viewHTMLElement.nextSibling)
                 this.subviews.insertElementAtIndex(this.subviews.indexOf(aboveView), view)
@@ -1783,15 +1784,17 @@ export class UIView extends UIObject {
                 this.viewHTMLElement.appendChild(view.viewHTMLElement)
                 this.subviews.push(view)
             }
+    
+            view.core = this.core
             view.didMoveToSuperview(this)
-            
+    
             if (this.superview && this.isMemberOfViewTree) {
-                
+        
                 view.broadcastEventInSubtree({
-                    
+            
                     name: UIView.broadcastEventName.AddedToViewTree,
                     parameters: nil
-                    
+            
                 })
                 
             }

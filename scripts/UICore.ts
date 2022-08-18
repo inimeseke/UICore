@@ -10,7 +10,10 @@ import { UIViewController } from "./UIViewController"
 export class UICore extends UIObject {
     
     rootViewController: UIViewController = nil
-    static RootViewControllerClass: any
+    
+    paddingLength = 20
+    
+    static RootViewControllerClass: typeof UIViewController = nil
     static main: UICore
     
     static languageService: UILanguageService = nil
@@ -25,13 +28,14 @@ export class UICore extends UIObject {
     constructor(rootDivElementID: string, rootViewControllerClass: typeof UIViewController) {
         
         super()
-        
+    
         UICore.RootViewControllerClass = rootViewControllerClass
-        UICore.main = this
+        UICore.main = UICore.main || this
         
         const rootViewElement = document.getElementById(rootDivElementID)
         const rootView = new UIView(rootDivElementID, rootViewElement)
         rootView.pausesPointerEvents = NO //YES;
+        rootView.core = this
         
         if (UICore.RootViewControllerClass) {
             
@@ -123,34 +127,20 @@ export class UICore extends UIObject {
             
             
         }.bind(this)
-        
+    
         window.addEventListener("hashchange", hashDidChange.bind(this), false)
-        
+    
         hashDidChange()
-        
-        
-        
-    }
     
     
     
-    
-    
-    static loadClass(className: string) {
-        
-        if (window[className]) {
-            return
-        }
-        
-        document.writeln("<script type='text/javascript' src='dist/UICore/" + className + ".js'></script>")
-        
     }
     
     
 }
 
 
-UICore.RootViewControllerClass = nil
+
 
 
 Array.prototype.indexOf || (Array.prototype.indexOf = function (d, e) {
