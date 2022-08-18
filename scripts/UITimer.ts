@@ -1,7 +1,8 @@
-import { NO, UIObject, YES } from "./UIObject"
+const YES = true
+const NO = false
 
 
-export class UITimer extends UIObject {
+export class UITimer {
     
     
     
@@ -14,14 +15,7 @@ export class UITimer extends UIObject {
     
     constructor(public interval: number, public repeats: boolean, public target: Function) {
         
-        super()
-        
-        this.superclass = UIObject
-        
-        
         this.schedule()
-        
-        
         
     }
     

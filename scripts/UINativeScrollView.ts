@@ -15,10 +15,6 @@ export class UINativeScrollView extends UIView {
         
         super(elementID, viewHTMLElement)
         
-        this._class = UINativeScrollView
-        this.superclass = UIView
-        
-        
         this.style.cssText = this.style.cssText + "-webkit-overflow-scrolling: touch;"
         
         this.style.overflow = "auto"

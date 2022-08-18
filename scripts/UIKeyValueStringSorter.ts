@@ -1,4 +1,6 @@
 import { IS, IS_NOT, MAKE_ID, NO, UIObject, YES } from "./UIObject"
+// @ts-ignore
+import UIKeyValueStringSorterWebWorker from "./UIKeyValueStringSorterWebWorker.worker.js"
 
 
 export interface UIKeyValueStringSorterSortingInstruction {
@@ -19,7 +21,7 @@ export interface UIKeyValueStringSorterSortingInstruction {
 export class UIKeyValueStringSorter extends UIObject {
     
     
-    static _sharedWebWorkerHolder = { webWorker: new Worker("compiledScripts//UIKeyValueStringSorterWebWorker.js") }
+    static _sharedWebWorkerHolder = { webWorker: new UIKeyValueStringSorterWebWorker() }
     
     static _instanceNumber = -1
     
@@ -36,13 +38,9 @@ export class UIKeyValueStringSorter extends UIObject {
         
         super()
         
-        this._class = UIKeyValueStringSorter
-        this.superclass = UIObject
-        
-        
         if (useSeparateWebWorkerHolder) {
-            
-            this._webWorkerHolder = { webWorker: new Worker("compiledScripts//UIKeyValueStringSorterWebWorker.js") }
+    
+            this._webWorkerHolder = { webWorker: new UIKeyValueStringSorterWebWorker() }
             
         }
         

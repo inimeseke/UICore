@@ -21,11 +21,6 @@ export class UIColor extends UIObject {
         
         super()
         
-        this._class = UIColor
-        this.superclass = UIObject
-        
-        
-        
     }
     
     

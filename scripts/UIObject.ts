@@ -1,8 +1,5 @@
-import { UICoreExtensionValueObject } from "./UICoreExtensions"
+import { UICoreExtensionValueObject } from "./UICoreExtensionValueObject"
 import { UITimer } from "./UITimer"
-
-
-
 
 
 export function NilFunction() {
@@ -231,11 +228,7 @@ export function MAKE_ID(randomPartLength = 15) {
 
 export function RETURNER<T>(value?: T) {
     
-    return function (...objects: any[]) {
-        
-        return value
-        
-    }
+    return (...objects: any[]) => value
     
 }
 
@@ -455,47 +448,21 @@ export type UIInitializerObject<T> = {
 }
 
 
-
-
-
-// @ts-ignore
-if (!window.AutoLayout) {
-    
-    // @ts-ignore
-    window.AutoLayout = nil
-    
-}
-
-
 export class UIObject {
     
-    _class: any
-    
     constructor() {
-        
-        this._class = UIObject
-        this.superclass = nil.class
-        
+    
+        // Do something here if needed
         
     }
     
     public get class(): any {
-        return (this.constructor as any)
+        return Object.getPrototypeOf(this).constructor
     }
-    
     
     public get superclass(): any {
-        
-        return (this.constructor as any).superclass
-        
+        return Object.getPrototypeOf(Object.getPrototypeOf(this)).constructor
     }
-    
-    public set superclass(superclass: any) {
-        (this.constructor as any).superclass = superclass
-    }
-    
-    
-    
     
     
     public static wrapObject<T>(object: T): UIObject & T {
@@ -507,10 +474,8 @@ export class UIObject {
         if (object instanceof UIObject) {
             return object
         }
-        
-        const result = Object.assign(new UIObject(), object)
-        
-        return result
+    
+        return Object.assign(new UIObject(), object)
         
     }
     
@@ -545,9 +510,7 @@ export class UIObject {
     static valueForKeyPath(keyPath: string, object: any): any {
         
         if (IS_NOT(keyPath)) {
-            
             return object
-            
         }
         
         const keys = keyPath.split(".")
@@ -560,21 +523,14 @@ export class UIObject {
             if (key.substring(0, 2) == "[]") {
                 
                 // This next object will be an array and the rest of the keys need to be run for each of the elements
-                
                 currentObject = currentObject[key.substring(2)]
                 
                 // CurrentObject is now an array
                 
                 const remainingKeyPath = keys.slice(i + 1).join(".")
-                
                 const currentArray = currentObject as unknown as any[]
-                
                 currentObject = currentArray.map(function (subObject, index, array) {
-                    
-                    const result = UIObject.valueForKeyPath(remainingKeyPath, subObject)
-                    
-                    return result
-                    
+                    return UIObject.valueForKeyPath(remainingKeyPath, subObject)
                 })
                 
                 break
@@ -593,9 +549,7 @@ export class UIObject {
     }
     
     setValueForKeyPath(keyPath: string, value: any, createPath = YES) {
-        
         return UIObject.setValueForKeyPath(keyPath, value, this, createPath)
-        
     }
     
     static setValueForKeyPath(keyPath: string, value: any, currentObject: any, createPath) {
@@ -619,25 +573,18 @@ export class UIObject {
             }
             currentObject = currentObject[key]
         })
-        
+    
         return didSetValue
-        
+    
     }
     
     
-    
-    
-    
-    configureWithObject(object: UIInitializerObject<this>): this {
-        
-        return UIObject.configureWithObject(this, object)
-        
+    configureWithObject(object: UIInitializerObject<this>) {
+        this.configuredWithObject(object)
     }
     
     configuredWithObject(object: UIInitializerObject<this>): this {
-        
         return UIObject.configureWithObject(this, object)
-        
     }
     
     
@@ -647,15 +594,11 @@ export class UIObject {
             !(item instanceof UICoreExtensionValueObject))
         
         function isAClass(funcOrClass) {
-            
             const isFunction = functionToCheck => (functionToCheck && {}.toString.call(functionToCheck) ===
                 "[object Function]")
-            
             const propertyNames = Object.getOwnPropertyNames(funcOrClass)
-            
             return (isFunction(funcOrClass) && !propertyNames.includes("arguments") &&
                 propertyNames.includes("prototype"))
-            
         }
         
         let keyPathsAndValues = []
@@ -667,7 +610,6 @@ export class UIObject {
                 source.forEach((sourceValue, key) => {
                     
                     const valueKeyPath = keyPath + "." + key
-                    
                     function addValueAndKeyPath(sourceValue) {
                         keyPathsAndValues.push({
                             value: sourceValue,
@@ -720,45 +662,30 @@ export class UIObject {
             let value = valueAndKeyPath.value
             
             const getTargetFunction = (bindThis = NO) => {
-                
                 let result = (UIObject.valueForKeyPath(keyPath, configurationTarget) as Function)
-                
                 if (bindThis) {
-                    
                     const indexOfDot = keyPath.lastIndexOf(".")
                     const thisObject = UIObject.valueForKeyPath(keyPath.substring(0, indexOfDot), configurationTarget)
                     result = result.bind(thisObject)
-                    
                 }
-                
                 return result
-                
             }
             
             if (value instanceof UILazyPropertyValue) {
-                
                 const indexOfDot = keyPath.lastIndexOf(".")
                 const thisObject = UIObject.valueForKeyPath(keyPath.substring(0, indexOfDot), configurationTarget)
                 const key = keyPath.substring(indexOfDot + 1)
-                
                 value.setLazyPropertyValue(key, thisObject)
-                
                 return
-                
             }
             
             if (value instanceof UIFunctionCall) {
-                
                 value.callFunction(getTargetFunction(YES))
-                
                 return
-                
             }
             
             if (value instanceof UIFunctionExtender) {
-                
                 value = value.extendedFunction(getTargetFunction())
-                
             }
             
             UIObject.setValueForKeyPath(keyPath, value, configurationTarget, YES)
@@ -771,27 +698,20 @@ export class UIObject {
     }
     
     
-    
-    
-    
-    performFunctionWithSelf(functionToPerform: (self: this) => any) {
-        
+    performFunctionWithSelf<T>(functionToPerform: (self: this) => T): T {
         return functionToPerform(this)
-        
+    }
+    
+    performingFunctionWithSelf(functionToPerform: (self: this) => void): this {
+        functionToPerform(this)
+        return this
     }
     
     performFunctionWithDelay(delay: number, functionToCall: Function) {
         
-        
-        
         new UITimer(delay, NO, functionToCall)
         
-        
-        
     }
-    
-    
-    
     
     
 }

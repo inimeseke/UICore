@@ -1,5 +1,5 @@
 import { UIDialogView } from "./UIDialogView"
-import { IS, nil, NO, UIObject, YES } from "./UIObject"
+import { FIRST_OR_NIL, IS, nil, NO, UIObject, YES } from "./UIObject"
 import { UIRoute } from "./UIRoute"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
 
@@ -9,93 +9,38 @@ import { UIView, UIViewBroadcastEvent } from "./UIView"
 
 export class UIViewController extends UIObject {
     
-    
-    parentViewController: UIViewController
-    childViewControllers: UIViewController[]
-    _UIViewController_constructorArguments: { "view": UIView; }
-    static readonly routeComponentName: string;
-    static readonly ParameterIdentifierName: any;
-    
-    
+    parentViewController: UIViewController = nil
+    childViewControllers: UIViewController[] = []
+    static readonly routeComponentName: string
+    static readonly ParameterIdentifierName: any
     
     constructor(public view: UIView) {
         
         super()
         
-        
-        this.loadIntrospectionVariables()
-        this._UIViewController_constructorArguments = { "view": view }
-        this._initInstanceVariables()
-        
-        this.loadSubviews()
-        this.updateViewConstraints()
-        this.updateViewStyles()
-        this._layoutViewSubviews()
-        
-        
+        this.view.viewController = this
         
     }
-    
-    
-    
-    loadIntrospectionVariables() {
-        
-        this._class = UIViewController
-        this.superclass = UIObject
-        
-        
-    }
-    
-    _initInstanceVariables() {
-        
-        
-        
-        this.view = this._UIViewController_constructorArguments.view
-        
-        this.view._viewControllerLayoutFunction = this.layoutViewsManually.bind(this)
-        this.view._didLayoutSubviewsDelegateFunction = this.viewDidLayoutSubviews.bind(this)
-        this.view._didReceiveBroadcastEventDelegateFunction = this.viewDidReceiveBroadcastEvent.bind(this)
-        
-        this.childViewControllers = []
-        this.parentViewController = nil
-        
-        
-        
-    }
-    
-    
-    
     
     
     handleRouteRecursively(route: UIRoute) {
         
         this.handleRoute(route)
+    
+        this.childViewControllers.forEach(controller => {
         
-        this.childViewControllers.forEach(function (controller, index, array) {
-            
-            if (!route.isHandled) {
-                controller.handleRouteRecursively(route)
-            }
-            
+            controller.handleRouteRecursively(route)
+        
         })
         
     }
     
     async handleRoute(route: UIRoute) {
-        
-        
-        
-    }
-    
-    
-    
-    loadSubviews() {
-    
-    
     
     
     
     }
+    
     
     async viewWillAppear() {
     
@@ -136,17 +81,15 @@ export class UIViewController extends UIObject {
     
     
     
-    
-    
     }
     
-    layoutViewsManually() {
+    layoutViewSubviews() {
         
         
         
     }
     
-    _layoutViewSubviews() {
+    _triggerLayoutViewSubviews() {
         
         this.view.layoutSubviews()
         
@@ -154,7 +97,12 @@ export class UIViewController extends UIObject {
         
     }
     
-    
+    viewWillLayoutSubviews() {
+        
+        this.updateViewConstraints()
+        this.updateViewStyles()
+        
+    }
     
     viewDidLayoutSubviews() {
         
@@ -179,17 +127,17 @@ export class UIViewController extends UIObject {
     
     
     
-    hasChildViewController(viewController) {
+    hasChildViewController(viewController: UIViewController) {
         
         // This is for performance reasons
         if (!IS(viewController)) {
             return NO
         }
         
-        for (var i = 0; i < this.childViewControllers.length; i++) {
-    
+        for (let i = 0; i < this.childViewControllers.length; i++) {
+            
             const childViewController = this.childViewControllers[i]
-    
+            
             if (childViewController == viewController) {
                 return YES
             }
@@ -200,7 +148,7 @@ export class UIViewController extends UIObject {
         
     }
     
-    addChildViewController(viewController) {
+    addChildViewController(viewController: UIViewController) {
         if (!this.hasChildViewController(viewController)) {
             viewController.willMoveToParentViewController(this)
             this.childViewControllers.push(viewController)
@@ -224,14 +172,15 @@ export class UIViewController extends UIObject {
     }
     
     
-    didMoveToParentViewController(parentViewController) {
+    didMoveToParentViewController(parentViewController: UIViewController) {
         
         this.parentViewController = parentViewController
         
     }
     
     removeChildViewController(controller: UIViewController) {
-        
+    
+        controller = FIRST_OR_NIL(controller)
         controller.viewWillDisappear()
         if (IS(controller.parentViewController)) {
             controller.removeFromParentViewController()
@@ -245,27 +194,31 @@ export class UIViewController extends UIObject {
     
     
     addChildViewControllerInContainer(controller: UIViewController, containerView: UIView) {
-        
+    
+        controller = FIRST_OR_NIL(controller)
+        containerView = FIRST_OR_NIL(containerView)
         controller.viewWillAppear()
         this.addChildViewController(controller)
         containerView.addSubview(controller.view)
         controller.didMoveToParentViewController(this)
         controller.viewDidAppear()
-        
-        controller.handleRouteRecursively(UIRoute.currentRoute);
-        
+    
+        controller.handleRouteRecursively(UIRoute.currentRoute)
+    
     }
     
     addChildViewControllerInDialogView(controller: UIViewController, dialogView: UIDialogView) {
-        
+    
+        controller = FIRST_OR_NIL(controller)
+        dialogView = FIRST_OR_NIL(dialogView)
         controller.viewWillAppear()
         this.addChildViewController(controller)
         dialogView.view = controller.view
-        
-        var originalDismissFunction = dialogView.dismiss.bind(dialogView)
-        
+    
+        const originalDismissFunction = dialogView.dismiss.bind(dialogView)
+    
         dialogView.dismiss = animated => {
-            
+        
             originalDismissFunction(animated)
             
             this.removeChildViewController(controller)
@@ -274,8 +227,8 @@ export class UIViewController extends UIObject {
         
         controller.didMoveToParentViewController(this)
         controller.viewDidAppear()
-        
-        controller.handleRouteRecursively(UIRoute.currentRoute);
+    
+        controller.handleRouteRecursively(UIRoute.currentRoute)
         
     }
     

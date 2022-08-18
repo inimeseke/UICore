@@ -1,4 +1,6 @@
 import { IS, IS_NOT, NO, UIObject, YES } from "./UIObject"
+// @ts-ignore
+import UIKeyValueStringFilterWebWorker from "./UIKeyValueStringFilterWebWorker.worker.js"
 
 
 
@@ -7,7 +9,7 @@ import { IS, IS_NOT, NO, UIObject, YES } from "./UIObject"
 export class UIKeyValueStringFilter extends UIObject {
     
     
-    static _sharedWebWorkerHolder = { webWorker: new Worker("compiledScripts//UIKeyValueStringFilterWebWorker.js") }
+    static _sharedWebWorkerHolder = { webWorker: new UIKeyValueStringFilterWebWorker() }
     
     static _instanceNumber = -1
     
@@ -23,13 +25,9 @@ export class UIKeyValueStringFilter extends UIObject {
         
         super()
         
-        this._class = UIKeyValueStringFilter
-        this.superclass = UIObject
-        
-        
         if (useSeparateWebWorkerHolder) {
-            
-            this._webWorkerHolder = { webWorker: new Worker("compiledScripts//UIKeyValueStringFilterWebWorker.js") }
+    
+            this._webWorkerHolder = { webWorker: new UIKeyValueStringFilterWebWorker() }
             
         }
         

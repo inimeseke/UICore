@@ -1,5 +1,5 @@
 import { UIColor } from "./UIColor"
-import { UILocalizedTextObject } from "./UICore"
+import { UILocalizedTextObject } from "./UIInterfaces"
 import { FIRST, IS_LIKE_NULL, nil, NO, UIObject, YES } from "./UIObject"
 import { UIRectangle } from "./UIRectangle"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
@@ -47,9 +47,6 @@ export class UITextView extends UIView {
         
         super(elementID, viewHTMLElement, textViewType)
         
-        this._class = UITextView
-        this.superclass = UIView
-        
         this.text = ""
         
         this.style.overflow = "hidden"
@@ -62,16 +59,15 @@ export class UITextView extends UIView {
         
         
         if (textViewType == UITextView.type.textArea) {
-            
+    
             this.pausesPointerEvents = YES
-            
-            this.addTargetForControlEvent(UIView.controlEvent.PointerUpInside, function (sender, event) {
-                
-                sender.focus()
-                
-            })
-            
-            
+    
+            this.addTargetForControlEvent(
+                UIView.controlEvent.PointerUpInside,
+                (sender, event) => sender.focus()
+            )
+    
+    
         }
         
         

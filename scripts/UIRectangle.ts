@@ -18,10 +18,6 @@ export class UIRectangle extends UIObject {
         
         super()
         
-        this._class = UIRectangle
-        this.superclass = UIObject
-        
-        
         this.min = new UIPoint(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY)
         this.max = new UIPoint(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY)
         

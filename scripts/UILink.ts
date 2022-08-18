@@ -11,8 +11,6 @@ import { UIViewBroadcastEvent } from "./UIView"
 
 export class UILink extends UIBaseButton {
     
-    
-    
     private _colors: UIButtonColorSpecifier
     
     
@@ -20,19 +18,10 @@ export class UILink extends UIBaseButton {
         
         super(elementID, "a", initViewData)
         
-        this._class = UILink
-        this.superclass = UIBaseButton
-        
         this.stopsPointerEventPropagation = NO
-        
         this.pausesPointerEvents = NO
         
-        
-        
     }
-    
-    
-    
     
     
     initView(elementID, viewHTMLElement, initViewData: { titleType: string }) {

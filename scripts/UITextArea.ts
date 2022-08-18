@@ -17,28 +17,24 @@ export class UITextArea extends UITextField {
         
         super(elementID, viewHTMLElement, UITextView.type.textArea)
         
-        this._class = UITextArea
-        this.superclass = UITextField
-        
         this.viewHTMLElement.removeAttribute("type")
         
         this.style.overflow = "auto"
-        
         this.style.webkitUserSelect = "text"
         
         this.pausesPointerEvents = NO
-        
+    
     }
     
     
     get addControlEventTarget(): UIViewAddControlEventTargetObject<typeof UITextArea.controlEvent> {
         
-        return super.addControlEventTarget as any;
+        return super.addControlEventTarget as any
         
     }
     
-    // @ts-ignore
-    get viewHTMLElement(): HTMLTextAreaElement {
+    
+    get viewHTMLElement(): HTMLTextAreaElement & HTMLInputElement {
         
         // @ts-ignore
         return super.viewHTMLElement

@@ -1,4 +1,6 @@
 import { IS, IS_NOT, MAKE_ID, NO, UIObject, YES } from "./UIObject"
+// @ts-ignore
+import UIStringFilterWebWorker from "./UIStringFilterWebWorker.worker.js"
 
 
 export class UIStringFilter extends UIObject {
@@ -6,7 +8,8 @@ export class UIStringFilter extends UIObject {
     
     
     
-    static _sharedWebWorkerHolder = { webWorker: new Worker("compiledScripts//UIStringFilterWebWorker.js") };
+    
+    static _sharedWebWorkerHolder = { webWorker: new UIStringFilterWebWorker() }
     
     static _instanceNumber = -1
     
@@ -21,17 +24,14 @@ export class UIStringFilter extends UIObject {
     
     constructor(useSeparateWebWorkerHolder = NO) {
         
-        
         super()
         
-        this._class = UIStringFilter
-        this.superclass = UIObject
-        
-        
         if (useSeparateWebWorkerHolder) {
-            
-            this._webWorkerHolder = { webWorker: new Worker("compiledScripts//UIStringFilterWebWorker.js") }
-            
+    
+            this._webWorkerHolder = {
+                webWorker: new UIStringFilterWebWorker()
+            }
+    
         }
         
         UIStringFilter._instanceNumber = UIStringFilter._instanceNumber + 1
@@ -41,31 +41,31 @@ export class UIStringFilter extends UIObject {
             
             this._webWorkerHolder.webWorker.onmessage = message => {
     
-                this.isWorkerBusy = NO;
-                this.postNextMessageIfNeeded();
-                
+                this.isWorkerBusy = NO
+                this.postNextMessageIfNeeded()
+    
                 const key = "" + message.data.identifier + message.data.instanceIdentifier
-        
+    
                 const completionFunction = this.completionFunctions[key]
-        
+    
                 if (IS(completionFunction)) {
-            
+        
                     //console.log("Filtering took " + (Date.now() - startTime) + " ms");
-            
+        
                     completionFunction(message.data.filteredData, message.data.filteredIndexes, message.data.identifier)
-            
+        
                 }
-                
-                delete this.completionFunctions[key];
-                
-                var asd = 1;
+    
+                delete this.completionFunctions[key]
+    
+                var asd = 1
                 
             }
             
         }
-        
-        
-        
+    
+    
+    
     
     
     }
@@ -82,51 +82,51 @@ export class UIStringFilter extends UIObject {
     
     
     get completionFunctions() {
-        
-        const key = "UICore_completionFunctions";
+    
+        const key = "UICore_completionFunctions"
         var result: {
         
             [x: string]: (filteredData: string[], filteredIndexes: number[], identifier: any) => void;
-            
-        } = this._webWorkerHolder[key];
+        
+        } = this._webWorkerHolder[key]
         
         if (IS_NOT(result)) {
-            
-            result = {};
-            this._webWorkerHolder[key] = result;
-            
+    
+            result = {}
+            this._webWorkerHolder[key] = result
+    
         }
-        
-        return result;
+    
+        return result
         
     }
     
     get messagesToPost() {
-        
-        const key = "UICore_messagesToPost";
-        var result: any[] = this._webWorkerHolder[key];
-        
+    
+        const key = "UICore_messagesToPost"
+        var result: any[] = this._webWorkerHolder[key]
+    
         if (IS_NOT(result)) {
-            
-            result = [];
-            this._webWorkerHolder[key] = result;
-            
-        }
         
-        return result;
+            result = []
+            this._webWorkerHolder[key] = result
+        
+        }
+    
+        return result
         
     }
     
     
     set isWorkerBusy(isWorkerBusy: boolean) {
-        
-        this._webWorkerHolder["UICore_isWorking"] = isWorkerBusy;
+    
+        this._webWorkerHolder["UICore_isWorking"] = isWorkerBusy
         
     }
     
     get isWorkerBusy() {
-        
-        return IS(this._webWorkerHolder["UICore_isWorking"]);
+    
+        return IS(this._webWorkerHolder["UICore_isWorking"])
         
     }
     
@@ -135,12 +135,12 @@ export class UIStringFilter extends UIObject {
     postNextMessageIfNeeded() {
         
         if (this.messagesToPost.length && IS_NOT(this.isWorkerBusy)) {
-            
-            this._webWorkerHolder.webWorker.postMessage(this.messagesToPost.firstElement);
-            this.messagesToPost.removeElementAtIndex(0);
-            
-            this.isWorkerBusy = YES;
-            
+    
+            this._webWorkerHolder.webWorker.postMessage(this.messagesToPost.firstElement)
+            this.messagesToPost.removeElementAtIndex(0)
+    
+            this.isWorkerBusy = YES
+    
         }
         
     }
@@ -173,16 +173,16 @@ export class UIStringFilter extends UIObject {
         this.completionFunctions[key] = completion
         
         this.messagesToPost.push({
-            
+    
             "filteringString": filteringString,
             "data": data,
             "excludedData": excludedData,
             "identifier": identifier,
             "instanceIdentifier": instanceIdentifier
-            
-        });
-        
-        this.postNextMessageIfNeeded();
+    
+        })
+    
+        this.postNextMessageIfNeeded()
         
         
     }
@@ -240,8 +240,8 @@ export class UIStringFilter extends UIObject {
         this._isThreadClosed = YES
         
         if (this._webWorkerHolder != UIStringFilter._sharedWebWorkerHolder) {
-            
-            this._webWorkerHolder.webWorker.terminate();
+    
+            this._webWorkerHolder.webWorker.terminate()
             
         }
         

@@ -13,17 +13,11 @@ export class UIActionIndicator extends UIView {
         
         super(elementID)
         
-        this._class = UIActionIndicator
-        this.superclass = UIView
-        
         this.indicatorView = new UIView(this.elementID + "IndicatorView")
-        
+        this.indicatorView.viewHTMLElement.classList.add("LukeHaasLoader")
         this.addSubview(this.indicatorView)
         
-        this.indicatorView.viewHTMLElement.classList.add("LukeHaasLoader")
-        
         this.hidden = YES
-        
         
     }
     

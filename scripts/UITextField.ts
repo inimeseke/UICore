@@ -17,32 +17,25 @@ export class UITextField extends UITextView {
     _viewHTMLElement: HTMLInputElement
     
     constructor(elementID?: string, viewHTMLElement = null, type = UITextView.type.textField) {
-        
+    
         super(elementID, type, viewHTMLElement)
-        
-        this._class = UITextField
-        this.superclass = UITextView
-        
+    
         this.viewHTMLElement.setAttribute("type", "text")
-        
+    
         this.backgroundColor = UIColor.whiteColor
-        
-        
-        
-        this.addTargetForControlEvent(UIView.controlEvent.PointerUpInside, function (sender, event) {
-            
-            sender.focus()
-            
-        })
-        
-        
+    
+        this.addTargetForControlEvent(
+            UIView.controlEvent.PointerUpInside,
+            (sender, event) => sender.focus()
+        )
+    
         this.viewHTMLElement.oninput = (event) => {
             this.sendControlEventForKey(UITextField.controlEvent.TextChange, event)
         }
-        
-        
+    
+    
         this.style.webkitUserSelect = "text"
-        
+    
         this.nativeSelectionEnabled = YES
         
         this.pausesPointerEvents = NO

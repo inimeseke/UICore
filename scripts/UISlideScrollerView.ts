@@ -32,10 +32,6 @@ export class UISlideScrollerView extends UIView {
         
         super(elementID, viewHTMLElement)
         
-        this._class = UIScrollView
-        this.superclass = UIView
-        
-        
         this._scrollView = new UIScrollView(elementID + "ScrollView")
         
         this.addSubview(this._scrollView)

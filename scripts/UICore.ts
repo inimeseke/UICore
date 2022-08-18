@@ -1,38 +1,9 @@
+import "./UICoreExtensions"
+import { UILanguageService } from "./UIInterfaces"
 import { nil, NO, UIObject } from "./UIObject"
 import { UIRoute } from "./UIRoute"
 import { UIView } from "./UIView"
 import { UIViewController } from "./UIViewController"
-import "./UICoreExtensions"
-
-
-
-
-
-export interface UILanguageService {
-    
-    currentLanguageKey: string;
-    
-    stringForKey(
-        key: string,
-        languageName: string,
-        defaultString: string,
-        parameters: { [x: string]: string | UILocalizedTextObject; }
-    ): string | undefined;
-    
-    stringForCurrentLanguage(localizedTextObject: UILocalizedTextObject);
-    
-    
-    
-}
-
-
-export interface UILocalizedTextObject {
-    
-    [key: string]: string;
-    
-}
-
-
 
 
 
@@ -44,21 +15,22 @@ export class UICore extends UIObject {
     
     static languageService: UILanguageService = nil
     
+    static readonly broadcastEventName = {
+        
+        "RouteDidChange": "RouteDidChange",
+        "WindowDidResize": "WindowDidResize"
+        
+    }
+    
     constructor(rootDivElementID: string, rootViewControllerClass: typeof UIViewController) {
         
         super()
         
-        this._class = UICore
-        this.superclass = UIObject
-        
         UICore.RootViewControllerClass = rootViewControllerClass
-        
         UICore.main = this
-    
+        
         const rootViewElement = document.getElementById(rootDivElementID)
-    
         const rootView = new UIView(rootDivElementID, rootViewElement)
-    
         rootView.pausesPointerEvents = NO //YES;
         
         if (UICore.RootViewControllerClass) {
@@ -67,7 +39,9 @@ export class UICore extends UIObject {
                 (UICore.RootViewControllerClass as any) === UIViewController) {
                 
                 console.log(
-                    "Error, UICore.RootViewControllerClass must be a or a subclass of UIViewController, falling back to UIViewController.")
+                    "Error, UICore.RootViewControllerClass must be UIViewController or a subclass of UIViewController, " +
+                    "falling back to UIViewController."
+                )
                 
                 UICore.RootViewControllerClass = UIViewController
                 
@@ -94,62 +68,62 @@ export class UICore extends UIObject {
                 
             }
         )
-    
-    
-    
+        
+        
+        
         const windowDidResize = function (this: UICore) {
-        
-            // Doing layout two times to prevent page scrollbars from confusing the layout
-            this.rootViewController._layoutViewSubviews()
-            UIView.layoutViewsIfNeeded()
-        
-            this.rootViewController._layoutViewSubviews()
-            //UIView.layoutViewsIfNeeded()
-        
-            this.rootViewController.view.broadcastEventInSubtree({
             
+            // Doing layout two times to prevent page scrollbars from confusing the layout
+            this.rootViewController._triggerLayoutViewSubviews()
+            UIView.layoutViewsIfNeeded()
+            
+            this.rootViewController._triggerLayoutViewSubviews()
+            //UIView.layoutViewsIfNeeded()
+            
+            this.rootViewController.view.broadcastEventInSubtree({
+                
                 name: UICore.broadcastEventName.WindowDidResize,
                 parameters: nil
-            
+                
             })
-        
-        }
-    
-        window.addEventListener("resize", windowDidResize.bind(this))
-    
-        const didScroll = function (this: UICore) {
-        
-            //code
-        
-            this.rootViewController.view.broadcastEventInSubtree({
             
+        }
+        
+        window.addEventListener("resize", windowDidResize.bind(this))
+        
+        const didScroll = function (this: UICore) {
+            
+            //code
+            
+            this.rootViewController.view.broadcastEventInSubtree({
+                
                 name: UIView.broadcastEventName.PageDidScroll,
                 parameters: nil
-            
+                
             })
-        
-        
-        
-        }.bind(this)
-    
-        window.addEventListener("scroll", didScroll, false)
-    
-        const hashDidChange = function (this: UICore) {
-        
-            //code
-        
-            this.rootViewController.handleRouteRecursively(UIRoute.currentRoute)
-        
-            this.rootViewController.view.broadcastEventInSubtree({
             
+            
+            
+        }.bind(this)
+        
+        window.addEventListener("scroll", didScroll, false)
+        
+        const hashDidChange = function (this: UICore) {
+            
+            //code
+            
+            this.rootViewController.handleRouteRecursively(UIRoute.currentRoute)
+            
+            this.rootViewController.view.broadcastEventInSubtree({
+                
                 name: UICore.broadcastEventName.RouteDidChange,
                 parameters: nil
-            
+                
             })
-        
-        
+            
+            
         }.bind(this)
-    
+        
         window.addEventListener("hashchange", hashDidChange.bind(this), false)
         
         hashDidChange()
@@ -159,12 +133,7 @@ export class UICore extends UIObject {
     }
     
     
-    static broadcastEventName = {
-        
-        "RouteDidChange": "RouteDidChange",
-        "WindowDidResize": "WindowDidResize"
-        
-    }
+    
     
     
     static loadClass(className: string) {
@@ -182,10 +151,6 @@ export class UICore extends UIObject {
 
 
 UICore.RootViewControllerClass = nil
-
-
-export const IS_FIREFOX = navigator.userAgent.toLowerCase().indexOf("firefox") > -1
-export const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 
 
 Array.prototype.indexOf || (Array.prototype.indexOf = function (d, e) {

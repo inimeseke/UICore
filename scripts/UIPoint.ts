@@ -10,9 +10,6 @@ export class UIPoint extends UIObject {
         
         super()
         
-        this._class = UIPoint
-        this.superclass = UIObject
-        
     }
     
     

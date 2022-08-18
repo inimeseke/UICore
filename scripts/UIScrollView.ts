@@ -27,12 +27,7 @@ export class UIScrollView extends UIView {
         
         super(elementID, viewHTMLElement)
         
-        this._class = UIScrollView
-        this.superclass = UIView
-        
-        
         this.containerView = new UIView(elementID + "ContainerView")
-        
         super.addSubview(this.containerView)
         
         

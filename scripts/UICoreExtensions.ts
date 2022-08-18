@@ -1,4 +1,9 @@
-import { NO, UIObject, YES } from "./UIObject"
+import { UICoreExtensionValueObject } from "./UICoreExtensionValueObject"
+import { UIObject } from "./UIObject"
+
+
+
+
 
 declare global {
     
@@ -6,33 +11,42 @@ declare global {
     interface Array<T> {
         
         removeElementAtIndex(index: number);
+        
         removeElement(element: T);
         
         insertElementAtIndex(index: number, element: T);
+        
         replaceElementAtIndex(index: number, element: T);
         
         
         contains(element: T): boolean;
+        
+        findAsyncSequential(functionToCall: (value: any) => Promise<boolean>): Promise<any>;
         
         groupedBy(keyFunction: (item: T) => any): { [key: string]: Array<T> } & Object;
         
         copy(): Array<T>;
         
         arrayByRepeating(numberOfRepetitions: number): Array<T>;
+        
         arrayByTrimmingToLengthIfLonger(maxLength: number): Array<T>;
         
         anyMatch(predicate: (value: T, index: number, obj: T[]) => boolean): boolean
+        
         noneMatch(predicate: (value: T, index: number, obj: T[]) => boolean): boolean
         
         allMatch(predicate: (value: T, index: number, obj: T[]) => boolean): boolean
         
-        readonly firstElement: T;
-        readonly lastElement: T;
+        firstElement: T;
+        lastElement: T;
         readonly summedValue: T;
         
+        everyElement: UIEveryElementItem<T>;
+        
         max(): number;
+        
         min(): number;
-    
+        
         isEqualToArray(array: Array<T>, keyPath?: string): boolean;
         
     }
@@ -72,16 +86,18 @@ declare global {
         forEach(callbackFunction: (value: any, key: string) => void): void;
         
         readonly allValues: Array<any>;
-        
+    
         readonly allKeys: string[];
-        
+    
     }
     
     
 }
 
-export {};
+export {}
 
+const YES = true
+const NO = false
 
 if ("removeElementAtIndex" in Array.prototype == NO) {
     
@@ -238,19 +254,48 @@ if ("allMatch" in Array.prototype == NO) {
         this: Array<any>,
         functionToCall: (value: any, index: number, array: any[]) => boolean
     ) {
-        
+    
         function reversedFunction(value: any, index: number, array: any[]) {
             return !functionToCall(value, index, array)
         }
-        
+    
         // @ts-ignore
         const result = (this.findIndex(reversedFunction) == -1)
+    
+        return result
+    
+    }
+    
+}
+
+if ("findAsyncSequential" in Array.prototype == NO) {
+    
+    (Array.prototype as any).findAsyncSequential = function (
+        this: Array<any>,
+        functionToCall: (value: any) => Promise<boolean>
+    ) {
+        
+        // https://stackoverflow.com/questions/55601062/using-an-async-function-in-array-find
+        async function findAsyncSequential<T>(
+            array: T[],
+            predicate: (t: T) => Promise<boolean>
+        ): Promise<T | undefined> {
+            for (const t of array) {
+                if (await predicate(t)) {
+                    return t
+                }
+            }
+            return undefined
+        }
+        
+        const result = findAsyncSequential(this, functionToCall)
         
         return result
         
     }
     
 }
+
 
 
 // interface Array<T> {
@@ -334,7 +379,7 @@ if ("everyElement" in Array.prototype == NO) {
         
                     return elementFunction()
         
-                });
+                })
     
             }
             
@@ -349,7 +394,7 @@ if ("everyElement" in Array.prototype == NO) {
                             return this.map((element, index, array) => UIObject.valueForKeyPath(
                                 valueKeys.join("."),
                                 element
-                            ));
+                            ))
                             
                         }
                         
@@ -496,13 +541,13 @@ if ("summedValue" in Array.prototype == NO) {
 //
 // }
 
-Array.prototype.max = function() {
-    return Math.max.apply(null, this);
-};
+Array.prototype.max = function () {
+    return Math.max.apply(null, this)
+}
 
-Array.prototype.min = function() {
-    return Math.min.apply(null, this);
-};
+Array.prototype.min = function () {
+    return Math.min.apply(null, this)
+}
 
 
 // interface Array<T> {
@@ -562,7 +607,6 @@ Array.prototype.isEqualToArray = function (array: any[], keyPath?: string) {
 
 // Hide method from for-in loops
 Object.defineProperty(Array.prototype, "isEqualToArray", { enumerable: false })
-
 
 
 
@@ -683,24 +727,12 @@ if ("objectByCopyingValuesRecursivelyFromObject" in Object.prototype == NO) {
     
 }
 
-export class UICoreExtensionValueObject {
-    
-    isAUICoreExtensionValueObject = YES;
-    value: any
-    
-    constructor(value: any) {
-        
-        this.value = value;
-        
-    }
-    
-}
 
 if ("asValueObject" in Object.prototype == NO) {
     
     (Object.prototype as any).asValueObject = function () {
-        
-        const result = new UICoreExtensionValueObject(this);
+    
+        const result = new UICoreExtensionValueObject(this)
         
         return result
         
@@ -724,10 +756,10 @@ export type Unpacked<T> =
     T extends (infer U)[]
         ? U
         : T extends (...args: any[]) => infer U
-        ? U
-        : T extends Promise<infer U>
             ? U
-            : T
+            : T extends Promise<infer U>
+                ? U
+                : T
 
 export type UnpackedObject<T> = {
     [P in keyof T]: Unpacked<T[P]>
@@ -735,19 +767,19 @@ export type UnpackedObject<T> = {
 
 export function promisedProperties<ObjectType extends object>(object: ObjectType): UnpackedObject<ObjectType> {
     
-    let promisedProperties = [];
-    const objectKeys = Object.keys(object);
+    let promisedProperties = []
+    const objectKeys = Object.keys(object)
     
-    objectKeys.forEach((key) => promisedProperties.push(object[key]));
+    objectKeys.forEach((key) => promisedProperties.push(object[key]))
     
     // @ts-ignore
     return Promise.all(promisedProperties)
-    .then((resolvedValues) => {
-        return resolvedValues.reduce((resolvedObject, property, index) => {
-            resolvedObject[objectKeys[index]] = property;
-            return resolvedObject;
-        }, object);
-    });
+        .then((resolvedValues) => {
+            return resolvedValues.reduce((resolvedObject, property, index) => {
+                resolvedObject[objectKeys[index]] = property
+                return resolvedObject
+            }, object)
+        })
     
 }
 

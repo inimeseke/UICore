@@ -15,9 +15,6 @@ export class UILayoutGrid extends UIObject {
         
         super()
         
-        this._class = UILayoutGrid
-        this.superclass = UIObject
-        
         this._frame = frame
         
     }

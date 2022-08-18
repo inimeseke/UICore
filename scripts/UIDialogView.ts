@@ -1,12 +1,13 @@
+import { IS_FIREFOX } from "./ClientCheckers"
 import { UIColor } from "./UIColor"
-import { IS_FIREFOX, UICore } from "./UICore"
+import { UICore } from "./UICore"
 import { IS, nil, NO, YES } from "./UIObject"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
 
 
 export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
     
-    
+    _isAUIDialogView = YES
     
     _view: ViewType = nil
     
@@ -245,11 +246,11 @@ export class UIDialogView<ViewType extends UIView = UIView> extends UIView {
         
         this.setPosition(0, 0, 0, 0, 0, "100%")
         this.setPosition(0, 0, 0, 0, UIView.pageHeight, "100%")
-    
+        
         const bounds = this.bounds
-    
+        
         const margin = 20
-    
+        
         //this.view.centerInContainer();
         
         this.view.style.position = "relative"

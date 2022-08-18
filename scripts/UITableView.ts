@@ -63,9 +63,6 @@ export class UITableView extends UINativeScrollView {
         
         super(elementID)
         
-        this._class = UITableView
-        this.superclass = UINativeScrollView
-        
         this.scrollsX = NO
         
     }

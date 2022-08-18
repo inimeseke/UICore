@@ -1,4 +1,3 @@
-import { UIButton } from "./UIButton"
 import { UIColor } from "./UIColor"
 import { IS, nil, NO, YES } from "./UIObject"
 import { UIView, UIViewBroadcastEvent } from "./UIView"
@@ -26,9 +25,6 @@ export class UIBaseButton extends UIView {
     constructor(elementID: string, elementType?: string, initViewData?: any) {
         
         super(elementID, nil, elementType, initViewData)
-        
-        this._class = UIButton
-        this.superclass = UIView
         
         this.initViewStateControl()
         

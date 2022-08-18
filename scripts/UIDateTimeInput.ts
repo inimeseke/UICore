@@ -12,19 +12,11 @@ export class UIDateTimeInput extends UIView {
         
         super(elementID, nil, "input")
         
-        this._class = UIDateTimeInput
-        this.superclass = UIView
-        
-        
         this.viewHTMLElement.setAttribute("type", type)
         
         this.viewHTMLElement.onchange = (event) => {
             this.sendControlEventForKey(UIDateTimeInput.controlEvent.ValueChange, event)
         }
-        
-        
-        
-        
         
     }
     

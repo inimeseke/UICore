@@ -19,18 +19,11 @@ export class UILinkButton extends UILink {
         
         super(elementID, { "elementType": elementType, "titleType": titleType })
         
-        this._class = UILinkButton
-        this.superclass = UILink
-        
-        
         this.button.addTargetForControlEvents([
             UIButton.controlEvent.EnterDown, UIButton.controlEvent.PointerUpInside
         ], function (this: UILinkButton, sender: UIButton, event: Event) {
     
-            const asd = 1
-    
             window.location = this.target as any
-            
             
         }.bind(this))
         

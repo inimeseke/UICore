@@ -23,8 +23,6 @@ export class UIImageView extends UIView {
         
         super(elementID, viewHTMLElement, "img")
         
-        this._class = UIImageView
-        this.superclass = UIView
         
         //this.actionIndicator = new UIActionIndicator(elementID + "ActionIndicator");
         

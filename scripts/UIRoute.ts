@@ -23,12 +23,6 @@ export interface UIRouteComponent<T = any> {
 // @ts-ignore
 export class UIRoute extends Array<UIRouteComponent> {
     
-    _isHandled: boolean = NO
-    completedComponents: UIRouteComponent[] = []
-    
-    parentRoute: UIRoute
-    
-    
     constructor(hash?: string) {
         
         super()
@@ -126,31 +120,6 @@ export class UIRoute extends Array<UIRouteComponent> {
     }
     
     
-    childRoute() {
-        
-        var result = this.copy()
-        
-        result.completedComponents.forEach(function (component, index, completedComponents) {
-            
-            var indexInResult = result.indexOf(component)
-            
-            if (indexInResult > -1) {
-                
-                result.splice(indexInResult, 1)
-                
-            }
-            
-        })
-        
-        result.completedComponents = []
-        
-        result.parentRoute = this
-        return result
-        
-    }
-    
-    
-    
     routeByRemovingComponentsOtherThanOnesNamed(componentNames: string[]) {
         const result = this.copy()
         const indexesToRemove: number[] = []
@@ -164,7 +133,6 @@ export class UIRoute extends Array<UIRouteComponent> {
         })
         return result
     }
-    
     
     
     routeByRemovingComponentNamed(componentName: string) {
@@ -254,7 +222,6 @@ export class UIRoute extends Array<UIRouteComponent> {
     }
     
     
-    
     componentWithViewController<T extends typeof UIViewController>(viewController: T): UIRouteComponent<{ [P in keyof T["ParameterIdentifierName"]]: string }> {
         
         return this.componentWithName(viewController.routeComponentName)
@@ -272,54 +239,14 @@ export class UIRoute extends Array<UIRouteComponent> {
     }
     
     
-    
-    didcompleteComponent(component: UIRouteComponent) {
-        
-        const self: UIRoute = this
-        const index = self.indexOf(component, 0)
-        if (index > -1) {
-            
-            
-            self.completedComponents.push(self.splice(index, 1)[0])
-            
-            //self.completedComponents.push(component);
-            
-        }
-        
-    }
-    
-    set isHandled(isHandled: boolean) {
-        
-        this._isHandled = isHandled
-        
-    }
-    
-    get isHandled() {
-        
-        return (this._isHandled || (this.length == 0 && this.completedComponents.length != 0))
-        
-    }
-    
-    
     get linkRepresentation() {
         return "#" + this.stringRepresentation
     }
     
     
     get stringRepresentation() {
+    
         var result = ""
-        this.completedComponents.forEach(function (component, index, self) {
-            result = result + component.name
-            const parameters = component.parameters
-            result = result + "["
-            Object.keys(parameters).forEach(function (key, index, keys) {
-                if (index) {
-                    result = result + ","
-                }
-                result = result + encodeURIComponent(key) + ":" + encodeURIComponent(parameters[key])
-            })
-            result = result + "]"
-        })
         this.forEach(function (component, index, self) {
             result = result + component.name
             const parameters = component.parameters
@@ -332,11 +259,10 @@ export class UIRoute extends Array<UIRouteComponent> {
             })
             result = result + "]"
         })
+    
         return result
+    
     }
-    
-    
-    
     
     
 }

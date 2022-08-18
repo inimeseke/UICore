@@ -1,11 +1,12 @@
-
+import { IS_FIREFOX, IS_SAFARI } from "./ClientCheckers"
 import { UIColor } from "./UIColor"
-import { IS_FIREFOX, IS_SAFARI, UICore, UILocalizedTextObject } from "./UICore"
-import { UIDialogView } from "./UIDialogView"
+import { UICore } from "./UICore"
+import { UILocalizedTextObject } from "./UIInterfaces"
 import { FIRST, IS, IS_DEFINED, IS_NIL, IS_NOT, nil, NO, UIObject, YES } from "./UIObject"
 import { UIPoint } from "./UIPoint"
 import { UIRectangle } from "./UIRectangle"
 import "./UICoreExtensions"
+import { UIViewController } from "./UIViewController"
 
 
 declare module AutoLayout {
@@ -50,7 +51,13 @@ declare module AutoLayout {
     
 }
 
-
+// @ts-ignore
+if (!window.AutoLayout) {
+    
+    // @ts-ignore
+    window.AutoLayout = nil
+    
+}
 
 
 
@@ -109,10 +116,8 @@ export class UIView extends UIObject {
     
     _controlEventTargets: ControlEventTargetsObject = {} //{ "PointerDown": Function[]; "PointerMove": Function[]; "PointerLeave": Function[]; "PointerEnter": Function[]; "PointerUpInside": Function[]; "PointerUp": Function[]; "PointerHover": Function[]; };
     _frameTransform: string
-    _viewControllerLayoutFunction: () => void = nil
-    _didLayoutSubviewsDelegateFunction: () => void
-    _didReceiveBroadcastEventDelegateFunction: (event: UIViewBroadcastEvent) => void
-    _updateLayoutFunction: any
+    viewController: UIViewController = nil
+    _updateLayoutFunction: any = nil
     // @ts-ignore
     _constraints: any[] //AutoLayout.Constraint[];
     superview: UIView
@@ -151,9 +156,6 @@ export class UIView extends UIObject {
     ) {
         
         super()
-        
-        this._class = UIView
-        this.superclass = UIObject
         
         // Instance variables
         
@@ -196,8 +198,6 @@ export class UIView extends UIObject {
         //     "PointerHover": []
         // }
         
-        this._didLayoutSubviewsDelegateFunction = function () {
-        }
         
         this._frameTransform = ""
         
@@ -381,7 +381,7 @@ export class UIView extends UIObject {
     
     
     createElement(elementID, elementType) {
-        var result = document.getElementById(elementID)
+        let result = document.getElementById(elementID)
         if (!result) {
             result = document.createElement(elementType)
         }
@@ -489,10 +489,10 @@ export class UIView extends UIObject {
         if (!IS(this.superview)) {
             return nil
         }
-        if (!(this instanceof UIDialogView)) {
+        if (!(this["_isAUIDialogView"])) {
             return this.superview.dialogView
         }
-        return this
+        return this as any as UIDialogView
     }
     
     
@@ -1535,34 +1535,26 @@ export class UIView extends UIObject {
     
     
     layoutSubviews() {
-        
+    
+        this.willLayoutSubviews()
         
         this._shouldLayout = NO
         
         // Autolayout
-        //window.removeEventListener('resize', this._updateLayoutFunction);
         if (this.constraints.length) {
-            
             this._updateLayoutFunction = UIView.performAutoLayout(this.viewHTMLElement, null, this.constraints)
-            
         }
-        
-        //this._updateLayoutFunction = this.layoutSubviews.bind(this);
-        
-        //window.addEventListener('resize', this._updateLayoutFunction);
-        
-        this._viewControllerLayoutFunction()
+        this._updateLayoutFunction()
+    
+        this.viewController.layoutViewSubviews()
         
         this.applyClassesAndStyles()
+    
+        for (let i = 0; i < this.subviews.length; i++) {
         
-        for (var i = 0; i < this.subviews.length; i++) {
-            
             const subview = this.subviews[i]
-            
             subview.calculateAndSetViewFrame()
-            
-            //subview.layoutSubviews();
-            
+        
         }
         
         this.didLayoutSubviews()
@@ -1590,19 +1582,25 @@ export class UIView extends UIObject {
             
             
             //classesString = classesString + " " + styleClass;
-            
+    
         }
-        
-        
+    
+    
         //this.viewHTMLElement.className = classesString;
+    
+    
+    
+    }
+    
+    willLayoutSubviews() {
         
-        
+        this.viewController.viewWillLayoutSubviews()
         
     }
     
     didLayoutSubviews() {
         
-        this._didLayoutSubviewsDelegateFunction()
+        this.viewController.viewDidLayoutSubviews()
         
     }
     
@@ -2555,11 +2553,11 @@ export class UIView extends UIObject {
         this.forEachViewInSubtree(function (view) {
             
             view.didReceiveBroadcastEvent(event)
-            
-            if (view._didReceiveBroadcastEventDelegateFunction) {
-                
-                view._didReceiveBroadcastEventDelegateFunction(event)
-                
+    
+            if (IS(view.viewController)) {
+        
+                view.viewController.viewDidReceiveBroadcastEvent(event)
+        
             }
             
         })
@@ -2743,7 +2741,7 @@ export class UIView extends UIObject {
     intrinsicContentSize(): UIRectangle {
         
         return nil
-        
+    
     }
     
     
@@ -2752,6 +2750,42 @@ export class UIView extends UIObject {
     
 }
 
+
+// This is here because modules fail with circular imports but they are needed here
+declare class UIDialogView<ViewType extends UIView = UIView> extends UIView {
+    _view: ViewType
+    _appearedAnimated: boolean
+    animationDuration: number
+    _zIndex: number
+    isVisible: boolean
+    dismissesOnTapOutside: boolean
+    
+    constructor(elementID?: string, viewHTMLElement?: HTMLElement);
+    
+    didDetectTapOutside(sender: UIView, event: Event): void;
+    
+    set zIndex(zIndex: number);
+    get zIndex(): number;
+    
+    set view(view: ViewType);
+    get view(): ViewType;
+    
+    willAppear(animated?: boolean): void;
+    
+    animateAppearing(): void;
+    
+    animateDisappearing(): void;
+    
+    showInView(containerView: UIView, animated: boolean): void;
+    
+    showInRootView(animated: boolean): void;
+    
+    dismiss(animated?: boolean): void;
+    
+    didReceiveBroadcastEvent(event: UIViewBroadcastEvent): void;
+    
+    layoutSubviews(): void;
+}
 
 
 

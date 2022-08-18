@@ -45,10 +45,6 @@ export class UIButton extends UIBaseButton {
         
         super(elementID, elementType, { "titleType": titleType })
         
-        this._class = UIButton
-        this.superclass = UIBaseButton
-        
-        
     }
     
     
